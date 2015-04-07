@@ -119,7 +119,7 @@ protected:
 	ptvec  _ni;    // arrys of unit ni vectors; ni = _mi[i] / _n;
 	point  _n;     // facet unit normal vector
 	valvec _len;   // arry of side lengths
-	valvec _g;     // results gx, gy, gz, gxx, gyy, gzz, gxy, gxz, gyz
+	//valvec _g;     // results gx, gy, gz, gxx, gyy, gzz, gxy, gxz, gyz
 
 	// physical parameters
 	// under bodyCCW is understand when facet is seen CCW from outside of the body

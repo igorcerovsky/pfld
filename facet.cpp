@@ -2,7 +2,8 @@
 
 namespace pfld {
 
-Facet::Facet() : _n(0,0,0),
+Facet::Facet() : _id(0),
+_n(0,0,0),
 _density(1000),
 _densityOpos(1000),
 _densGrad(0,0,0),
@@ -12,7 +13,9 @@ _mi(),
 _ni(),
 _pts(),
 _L(),
-_len()
+_len(),
+_bLin(false),
+_bLinOpos(false)
 {
 }
 
@@ -24,7 +27,10 @@ _densGrad(fct._densGrad),
 _densGradOpos(fct._densGradOpos),
 _sign(fct._sign),
 _mi(fct._mi),
-_ni(fct._ni)
+_ni(fct._ni),
+_bLin(fct._bLin),
+_bLinOpos(fct._bLinOpos)
+
 {
 	_pts.assign(fct._pts.begin(), fct._pts.end());
 	_L.assign(fct._L.begin(), fct._L.end());
@@ -46,6 +52,8 @@ Facet& Facet::operator=(const Facet& fct)
 	_ni = fct._ni;
 	_n = fct._n;
 	_len.assign(fct._len.begin(), fct._len.end());
+	_bLin = fct._bLin;
+	_bLinOpos = fct._bLinOpos;
 	return *this;
 }
 
