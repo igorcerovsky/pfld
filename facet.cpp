@@ -64,12 +64,10 @@ void Facet::operator()(point& v_r, point& v_Grv)
 
 void Facet::Init()
 {
-	//TRACE("\n Facet Init.\n");
 	// side normal vector n; only if the angle between l_th and (l-1)th edge is smaller then PI (180 deg), what is true for triangle 
 	//v_n = ( pts[2] - pts[1] ) / ( pts[1] - pts[0] );	// side normal vector (operator /  is vector multiplication see class CPoint 3D)
 	_n = (_pts[0] - _pts[1]) / (_pts[1] - _pts[2]);
 	_n.Unit();
-	//// TRACE("Side normal vector is (%f, %f, %f)\n", (float) v_n.x, (float) v_n.y, (float) v_n.z);
 
 	// for each edge
 	const int n(_pts.size());
@@ -77,28 +75,20 @@ void Facet::Init()
 	_ni.resize(n);
 	_L.resize(n);
 	_len.resize(n);
-	for (int i = 0; i < n; i++) {
-		//TRACE("   x=%6.1f, y=%6.1f z=%6.1f \n", (float) pts[i].x, (float) pts[i].y, (float) pts[i].z);
-		// (a) length and unit vector v_mi	
-		if (i != n - 1) {
-			_mi[i] = _pts[i + 1] - _pts[i];
-			_L[i] = _mi[i];
-			_len[i] = _mi[i].Abs();				// edge length
-			_mi[i].Unit();
-		}
-		else {
-			_mi[i] = _pts[0] - _pts[i];
-			_L[i] = _mi[i];
-			_len[i] = _mi[i].Abs();				// edge length
-			_mi[i].Unit();
-		}
-		// TRACE("   length is   %f\n", (float) len[i]);
-		// TRACE("   v_mi vector is (%f, %f, %f)\n", (float) v_mi[i].x, (float) v_mi[i].y, (float) v_mi[i].z);
-
-		// edge unit vector v_ni
-		_ni[i] = _mi[i] / _n;
-		//// TRACE("   v_ni vector is (%f, %f, %f)\n", (float) pt.x, (float) pt.y, (float) pt.z);
+	int i = 0;
+	for (; i < n - 1; ++i )
+	{
+		_mi[i] = _pts[i + 1] - _pts[i];
+		_L[i] = _mi[i];
+		_len[i] = _mi[i].Abs(); // edge length
+		_mi[i].Unit();
+		_ni[i] = _mi[i] / _n;   // edge unit vector v_ni
 	}
+	_mi[i] = _pts[0] - _pts[i];
+	_L[i] = _mi[i];
+	_len[i] = _mi[i].Abs();
+	_mi[i].Unit();
+	_ni[i] = _mi[i] / _n;
 
 	// what kind of computation?
 	_bLin = _densGrad.IsZero();
@@ -130,7 +120,7 @@ void Facet::FldVlado(point &v_r, point &v_Grv)
 	const int n(_pts.size());
 	double z, u, v, w, W2, W, U, V, T, f = 0.0;
 
-	z = fabs(_n * (_pts.at(0) - v_r)) /*+ EPS*/;
+	z = fabs(_n * (_pts.at(0) - v_r)) + EPS;
 
 	for (int i = 0; i < n; i++) 
 	{
