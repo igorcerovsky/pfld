@@ -92,7 +92,7 @@ class Facet
 {
 
 public:
-	virtual ~Facet();
+	virtual ~Facet() {};
 	Facet();
 	Facet(const Facet& fct);
 
