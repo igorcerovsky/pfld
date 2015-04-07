@@ -2,9 +2,18 @@
 
 namespace pfld {
 
-Facet::Facet()
+Facet::Facet() : _n(0,0,0),
+_density(1000),
+_densityOpos(1000),
+_densGrad(0,0,0),
+_densGradOpos(0,0,0),
+_sign(1.0),
+_mi(),
+_ni(),
+_pts(),
+_L(),
+_len()
 {
-
 }
 
 Facet::Facet(const Facet& fct) : _id(fct._id),
@@ -63,7 +72,11 @@ void Facet::Init()
 	//// TRACE("Side normal vector is (%f, %f, %f)\n", (float) v_n.x, (float) v_n.y, (float) v_n.z);
 
 	// for each edge
-	int n(_pts.size());
+	const int n(_pts.size());
+	_mi.resize(n);
+	_ni.resize(n);
+	_L.resize(n);
+	_len.resize(n);
 	for (int i = 0; i < n; i++) {
 		//TRACE("   x=%6.1f, y=%6.1f z=%6.1f \n", (float) pts[i].x, (float) pts[i].y, (float) pts[i].z);
 		// (a) length and unit vector v_mi	
@@ -108,14 +121,12 @@ void Facet::Init(ptvec& pts, double densityCCW /*= 1000.0*/, double densityCW /*
 	Init();
 }
 
+// !!! Init MUST be called first
+// v_r point distance vector
+// v_Grv otput field 
 void Facet::FldVlado(point &v_r, point &v_Grv)
 {
-	// !!! Init MUST be called first
-	// v_r pointer to point distance vector
-	// **pts array of pointers to facet points
-	// n number of facet points
-
-	int n = 3;
+	const int n( _pts.size() );
 	// second part of algorithm, computing field 
 	double z, u, v, w, W2, W, U, V, T, f = 0.0, ff = 0.0;
 
@@ -127,7 +138,7 @@ void Facet::FldVlado(point &v_r, point &v_Grv)
 		v = u + _len[i];
 		w = _ni[i] * (_pts[i] - v_r);
 
-		z = z + EPS;
+		//z = z + EPS;
 		W2 = w*w + z*z;
 		U = sqrt(u*u + W2);
 		V = sqrt(v*v + W2);

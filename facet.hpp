@@ -75,7 +75,7 @@ public:
 		return (x < eps && y < eps && z <eps);
 	}
 
-protected:
+public:
 	T x;
 	T y;
 	T z;
@@ -86,7 +86,7 @@ enum class FacetType { normal, oposite };
 
 using valvec = std::vector < double >;
 using point = Point3D < double >;
-using ptvec = std::vector < point >;
+using ptvec = std::vector < Point3D<double> > ;
 
 class Facet
 {
@@ -138,7 +138,7 @@ protected:
 public:
 	void Init();
 	void Init(ptvec& pts);
-	void Init(ptvec& pts, double densityCCW = 1000.0, double densityCW = 0.0);
+	void Init(ptvec& pts, double densityCCW, double densityCW = 0.0);
 
 	void FldVlado(point &v_r, point &v_Grv);
 
