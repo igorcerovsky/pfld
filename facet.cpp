@@ -130,7 +130,7 @@ void Facet::FldVlado(point &v_r, point &v_Grv)
 	// second part of algorithm, computing field 
 	double z, u, v, w, W2, W, U, V, T, f = 0.0, ff = 0.0;
 
-	z = fabs(_n * (_pts.at(0) - v_r));
+	z = fabs(_n * (_pts.at(0) - v_r)) + EPS;
 
 	for (int i = 0; i < n; i++) {
 		// TRACE("p1.x = %6.4f, p1.y = %6.4f, p1.z = %6.4f\n", (float) (pts[i]).x, (float) (pts[i]).y, (float) (pts[i]).z);
@@ -138,7 +138,6 @@ void Facet::FldVlado(point &v_r, point &v_Grv)
 		v = u + _len[i];
 		w = _ni[i] * (_pts[i] - v_r);
 
-		//z = z + EPS;
 		W2 = w*w + z*z;
 		U = sqrt(u*u + W2);
 		V = sqrt(v*v + W2);
