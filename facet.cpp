@@ -130,14 +130,14 @@ void Facet::FldVlado(point &v_r, point &v_Grv)
 	const int n(_pts.size());
 	double z, u, v, w, W2, W, U, V, T, f = 0.0;
 
-	z = fabs(_n * (_pts.at(0) - v_r)) + EPS;
+	z = fabs(_n * (_pts.at(0) - v_r)) /*+ EPS*/;
 
 	for (int i = 0; i < n; i++) 
 	{
 		auto tmp = _pts[i] - v_r;
-		u = _mi[i] * (_pts[i] - v_r);
+		u = _mi[i] * (tmp);
+		w = _ni[i] * (tmp);
 		v = u + _len[i];
-		w = _ni[i] * (_pts[i] - v_r);
 
 		W2 = w*w + z*z;
 		U = sqrt(u*u + W2);
