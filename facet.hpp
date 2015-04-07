@@ -11,7 +11,7 @@ namespace pfld {
 
 #define EPS	1.0e-12
 #define PI 3.1415926535897932384626433832795
-#define GRAVCONST 6.67259e-11
+#define GRAVCONST 6.6738480e-11
 
 
 template<typename T> T sign(T d) { return ((d == 0) ? 0.0 : ((d<0) ? -1 : 1)); }
@@ -71,8 +71,14 @@ public:
 
 	bool IsZero()
 	{
-		auto eps = std::numeric_limits<T>::epsilon();
-		return (x < eps && y < eps && z <eps);
+		return (x < DBL_EPSILON && y < DBL_EPSILON && z < DBL_EPSILON);
+	}
+
+	bool IsEqualEps(const Point3D& pt, const double eps = DBL_EPSILON)
+	{
+		return (fabs(x - pt.x) < eps
+			&& fabs(y - pt.y) < eps
+			&& fabs(z - pt.z) < eps);
 	}
 
 public:

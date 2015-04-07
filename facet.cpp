@@ -126,14 +126,15 @@ void Facet::Init(ptvec& pts, double densityCCW /*= 1000.0*/, double densityCW /*
 // v_Grv otput field 
 void Facet::FldVlado(point &v_r, point &v_Grv)
 {
-	const int n( _pts.size() );
 	// second part of algorithm, computing field 
-	double z, u, v, w, W2, W, U, V, T, f = 0.0, ff = 0.0;
+	const int n(_pts.size());
+	double z, u, v, w, W2, W, U, V, T, f = 0.0;
 
 	z = fabs(_n * (_pts.at(0) - v_r)) + EPS;
 
-	for (int i = 0; i < n; i++) {
-		// TRACE("p1.x = %6.4f, p1.y = %6.4f, p1.z = %6.4f\n", (float) (pts[i]).x, (float) (pts[i]).y, (float) (pts[i]).z);
+	for (int i = 0; i < n; i++) 
+	{
+		auto tmp = _pts[i] - v_r;
 		u = _mi[i] * (_pts[i] - v_r);
 		v = u + _len[i];
 		w = _ni[i] * (_pts[i] - v_r);
@@ -149,7 +150,6 @@ void Facet::FldVlado(point &v_r, point &v_Grv)
 	f *= GRAVCONST;
 
 	v_Grv += _n*f;
-	// TRACE("Vlado returns f = %6.12f\n", (float) f * v_n.z);
 }
 
 
