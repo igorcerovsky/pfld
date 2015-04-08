@@ -3,34 +3,38 @@
 namespace pfld {
 
 Facet::Facet() : _id(0),
-_n(0,0,0),
-_density(1000),
-_densityOpos(1000),
-_densGrad(0,0,0),
-_densGradOpos(0,0,0),
-_sign(1.0),
-_mi(),
-_ni(),
-_pts(),
-_L(),
-_len(),
-_bLin(false),
-_bLinOpos(false)
+	_n(0, 0, 0),
+	_density(1000),
+	_densityOpos(1000),
+	_densGrad(0, 0, 0),
+	_densGradOpos(0, 0, 0),
+	_sign(1.0),
+	_mi(),
+	_ni(),
+	_pts(),
+	_L(),
+	_len(),
+	_bLin(false),
+	_bLinOpos(false)
 {
 }
 
-Facet::Facet(const Facet& fct) : _id(fct._id),
-_n(fct._n),
-_density(fct._density),
-_densityOpos(fct._densityOpos),
-_densGrad(fct._densGrad),
-_densGradOpos(fct._densGradOpos),
-_sign(fct._sign),
-_mi(fct._mi),
-_ni(fct._ni),
-_bLin(fct._bLin),
-_bLinOpos(fct._bLinOpos)
+Facet::Facet(const ptvec& pts) : Facet()
+{
+	_pts.assign(pts.begin(), pts.end());
+}
 
+Facet::Facet(const Facet& fct) : _id(fct._id),
+	_n(fct._n),
+	_density(fct._density),
+	_densityOpos(fct._densityOpos),
+	_densGrad(fct._densGrad),
+	_densGradOpos(fct._densGradOpos),
+	_sign(fct._sign),
+	_mi(fct._mi),
+	_ni(fct._ni),
+	_bLin(fct._bLin),
+	_bLinOpos(fct._bLinOpos)
 {
 	_pts.assign(fct._pts.begin(), fct._pts.end());
 	_L.assign(fct._L.begin(), fct._L.end());
@@ -62,14 +66,6 @@ bool Facet::operator==(const Facet& fct) const
 	return _n == fct._n;
 }
 
-void Facet::operator()(point& v_r, point& v_Grv)
-{
-	if (!_initialized)
-		Init();
-	
-	FldVlado(v_r, v_Grv);
-}
-
 void Facet::Init()
 {
 	// side normal vector n; only if the angle between l_th and (l-1)th edge is smaller then PI (180 deg), what is true for triangle 
@@ -84,7 +80,7 @@ void Facet::Init()
 	_L.resize(n);
 	_len.resize(n);
 	int i = 0;
-	for (; i < n - 1; ++i )
+	for (; i < n - 1; ++i)
 	{
 		_mi[i] = _pts[i + 1] - _pts[i];
 		_L[i] = _mi[i];
@@ -122,15 +118,15 @@ void Facet::Init(ptvec& pts, double densityCCW /*= 1000.0*/, double densityCW /*
 // !!! Init MUST be called first
 // v_r point distance vector
 // v_Grv otput field 
-void Facet::FldVlado(point &v_r, point &v_Grv)
+void Facet::FldVlado(const point& v_r, double& f)
 {
 	// second part of algorithm, computing field 
 	const int n(_pts.size());
-	double z, u, v, w, W2, W, U, V, T, f = 0.0;
+	double z, u, v, w, W2, W, U, V, T;
 
 	z = fabs(_n * (_pts.at(0) - v_r)) + EPS;
 
-	for (int i = 0; i < n; i++) 
+	for (int i = 0; i < n; i++)
 	{
 		auto tmp = _pts[i] - v_r;
 		u = _mi[i] * (tmp);
@@ -146,8 +142,33 @@ void Facet::FldVlado(point &v_r, point &v_Grv)
 			2 * z*atan((2 * w*_len[i]) / ((T + _len[i])*fabs(T - _len[i]) + 2 * T*z));
 	}
 	f *= GRAVCONST;
+}
 
+
+void Facet::Fld_G(const point& v_r, point& v_Grv)
+{
+	double f = 0.0;
+	FldVlado(v_r, f);
 	v_Grv += _n*f;
+}
+
+
+void Facet::Fld_Gz(const point& v_r, atmic_double& g)
+{
+	double f = 0.0;
+	FldVlado(v_r, f);
+	f *= _n.z;
+	g = g + f;
+}
+
+void Facet::operator()(const point& v_r, point& v_Grv)
+{
+	Fld_G(v_r, v_Grv);
+}
+
+void Facet::operator()(const point& v_r, atmic_double& g)
+{
+	Fld_Gz(v_r, g);
 }
 
 

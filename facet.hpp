@@ -6,6 +6,7 @@
 #include <array>
 #include <cmath>
 #include <limits>
+#include <atomic>
 
 namespace pfld {
 
@@ -93,6 +94,7 @@ enum class FacetType { normal, oposite };
 using valvec = std::vector < double >;
 using point = Point3D < double >;
 using ptvec = std::vector < Point3D<double> > ;
+using atmic_double = std::atomic < double > ;
 
 class Facet
 {
@@ -100,15 +102,17 @@ class Facet
 public:
 	virtual ~Facet() {};
 	Facet();
+	Facet(const ptvec& pts);
 	Facet(const Facet& fct);
 
 	Facet& operator=(const Facet& fct);
 	bool operator==(const Facet& fct) const;
 
-	Facet(const Facet&& fct) {};
-	Facet& operator=(const Facet&& fct) {};
+	//Facet(const Facet&& fct) = delete;
+	//Facet& operator=(const Facet&& fct) = delete;
 
-	void operator()(point& v_r, point& v_Grv);
+	void operator()(const point& v_r, point& v_Grv);
+	void operator()(const point& v_r, atmic_double& g);
 
 protected:
 	bool   _initialized; // is initialized?
@@ -146,10 +150,17 @@ public:
 	void Init(ptvec& pts);
 	void Init(ptvec& pts, double densityCCW, double densityCW = 0.0);
 
-	void FldVlado(point &v_r, point &v_Grv);
+	//double GetSign()          { return _sign; }
+	//void SetSign(double sign) { _sign = sign; }
 
-	double GetSign()          { return _sign; }
-	void SetSign(double sign) { _sign = sign; }
+	void Fld_G(const point &v_r, point& v_Grv);
+	void Fld_Gz(const point &v_r, atmic_double& g);
+
+	ptvec& Data() { return _pts;}
+
+
+protected:
+	void FldVlado(const point &v_r, double& f);
 
 };
 
