@@ -15,7 +15,10 @@ namespace pfld {
 #define GRAVCONST 6.6738480e-11
 
 
-template<typename T> T sign(T d) { return ((d == 0) ? 0.0 : ((d<0) ? -1 : 1)); }
+//template<typename T> T sign(T d) { return ((d == 0) ? 0.0 : ((d<0) ? -1 : 1)); }
+
+
+template <typename T> T sign(T val) {	return (T(0) < val) - (val < T(0));}
 
 template <typename T>
 class Point3D

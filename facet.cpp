@@ -121,16 +121,16 @@ void Facet::Init(ptvec& pts, double densityCCW /*= 1000.0*/, double densityCW /*
 void Facet::FldVlado(const point& v_r, double& f)
 {
 	// second part of algorithm, computing field 
-	const int n(_pts.size());
+	const auto n(_pts.size());
 	double z, u, v, w, W2, W, U, V, T;
 
 	z = fabs(_n * (_pts.at(0) - v_r)) + EPS;
 
-	for (int i = 0; i < n; i++)
+	for (unsigned i = 0; i < n; i++)
 	{
 		auto tmp = _pts[i] - v_r;
-		u = _mi[i] * (tmp);
-		w = _ni[i] * (tmp);
+		u = _mi[i] * tmp;
+		w = _ni[i] * tmp;
 		v = u + _len[i];
 
 		W2 = w*w + z*z;
