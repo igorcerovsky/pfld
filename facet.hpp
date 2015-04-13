@@ -107,9 +107,9 @@ using point = Point3D < double >;
 using ptvec = std::vector < Point3D<double> > ;
 using double_pfld = std::atomic < double > ;
 
+
 class Facet
 {
-
 public:
 	virtual ~Facet() {};
 	Facet();
@@ -118,9 +118,6 @@ public:
 
 	Facet& operator=(const Facet& fct);
 	bool operator==(const Facet& fct) const;
-
-	//Facet(const Facet&& fct) = delete;
-	//Facet& operator=(const Facet&& fct) = delete;
 
 	void operator()(const point& v_r, point& v_Grv);
 	void operator()(const point& v_r, double_pfld& g);
@@ -137,36 +134,15 @@ protected:
 	valvec _len;   // arry of side lengths
 	//valvec _g;     // results gx, gy, gz, gxx, gyy, gzz, gxy, gxz, gyz
 
-	// physical parameters
-	// under bodyCCW is understand when facet is seen CCW from outside of the body
-	double  _density;		// density of pBodyCCW
-	point   _densGrad;		// density gradien of bodyCCW
-	bool    _bLin;			// if compute withLinear Density
-
-	// bodyCW -> oposit body, facet is ordered CW
-	double  _densityOpos;	// density of oposit body
-	point   _densGradOpos;	// density gradien of bodyCCW
-	bool    _bLinOpos;		// if compute with linear density
-
-	// facet sign for updating
-	double  _sign;		// m_dSign == -1 to remove field; m_dSign == 1 to add field
-
-	// temporary variables
-	point   _tmpFld;			// field from body which facet is seen from outside CCW
-	point   _tmpFldGrd;		// gradients
-	point   _tmpFldOpos;		// oposit facet
-
 
 public:
 	void Init();
 	void Init(ptvec& pts);
 	void Init(ptvec& pts, double densityCCW, double densityCW = 0.0);
 
-	//double GetSign()          { return _sign; }
-	//void SetSign(double sign) { _sign = sign; }
-
 	void Fld_G(const point &v_r, point& v_Grv);
 	void Fld_Gz(const point &v_r, double_pfld& g);
+	void Fld_G(const point& v_r, point& v_Grv, const point& ro, const double& ro0);
 
 	ptvec& Data() { return _pts;}
 

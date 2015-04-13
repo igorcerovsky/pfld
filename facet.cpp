@@ -6,18 +6,11 @@ Facet::Facet() : _id(0),
 	_sz(0),
 	_initialized(false),
 	_n(0, 0, 0),
-	_density(1000),
-	_densityOpos(1000),
-	_densGrad(0, 0, 0),
-	_densGradOpos(0, 0, 0),
-	_sign(1.0),
 	_mi(),
 	_ni(),
 	_pts(),
 	_L(),
-	_len(),
-	_bLin(false),
-	_bLinOpos(false)
+	_len()
 {
 }
 
@@ -31,15 +24,8 @@ Facet::Facet(const Facet& fct) : _id(fct._id),
 	_sz(fct._sz),
 	_initialized(fct._initialized),
 	_n(fct._n),
-	_density(fct._density),
-	_densityOpos(fct._densityOpos),
-	_densGrad(fct._densGrad),
-	_densGradOpos(fct._densGradOpos),
-	_sign(fct._sign),
 	_mi(fct._mi),
-	_ni(fct._ni),
-	_bLin(fct._bLin),
-	_bLinOpos(fct._bLinOpos)
+	_ni(fct._ni)
 {
 	_pts.assign(fct._pts.begin(), fct._pts.end());
 	_L.assign(fct._L.begin(), fct._L.end());
@@ -52,18 +38,11 @@ Facet& Facet::operator=(const Facet& fct)
 	_initialized = fct._initialized;
 	_sz = fct._sz;
 	_n = fct._n;
-	_density = fct._density;
-	_densityOpos = fct._densityOpos;
-	_densGrad = fct._densGrad;
-	_densGradOpos = fct._densGradOpos;
-	_sign = fct._sign;
 	_pts.assign(fct._pts.begin(), fct._pts.end());
 	_L.assign(fct._L.begin(), fct._L.end());
 	_mi.assign(fct._mi.begin(), fct._mi.end());
 	_ni.assign(fct._ni.begin(), fct._ni.end());
 	_len.assign(fct._len.begin(), fct._len.end());
-	_bLin = fct._bLin;
-	_bLinOpos = fct._bLinOpos;
 	return *this;
 }
 
@@ -99,10 +78,6 @@ void Facet::Init()
 	_mi[i].Unit();
 	point::Cross(_mi[i], _n, _ni[i]);
 
-	// what kind of computation?
-	_bLin = _densGrad.IsZero();
-	_bLinOpos = _densGradOpos.IsZero();
-
 	_initialized = true;
 }
 
@@ -115,8 +90,6 @@ void Facet::Init(ptvec& pts)
 void Facet::Init(ptvec& pts, double densityCCW /*= 1000.0*/, double densityCW /*= 0.0*/)
 {
 	_pts.assign(pts.begin(), pts.end());
-	_density = densityCCW;
-	_densityOpos = densityCW;
 	Init();
 }
 
@@ -132,7 +105,6 @@ void Facet::FldVlado(const point& v_r, double& f)
 
 	for (unsigned i = 0; i < _sz; i++)
 	{
-		//auto tmp = _pts[i] - v_r;
 		point tmp;
 		point::Sub(_pts[i], v_r, tmp);
 		u = _mi[i] * tmp;
@@ -150,6 +122,50 @@ void Facet::FldVlado(const point& v_r, double& f)
 	f *= GRAVCONST;
 }
 
+
+// gravity field for variable density
+// ro density gradient vector
+// ro0 density in origin of coordinate system
+void Facet::Fld_G(const point& v_r, point& v_Grv, const point& ro, const double& ro0)
+{
+	int n = 3;
+	// second part of algorithm, computing field 
+	double z, u, v, w, W2, W, U, V, T, L, A, Fi, Fi2, d, Z;
+	point f;
+	const double ro_r{ ro0 + ro*v_r };
+
+	Z = _n * (_pts[0] - v_r);
+	z = fabs(Z) + EPS;
+
+	const double ronz = ro*_n*Z;
+	for (int i = 0; i < n; i++) 
+	{
+		point ptTmp1;
+		point::Sub(_pts[i],v_r, ptTmp1);
+		u = _mi[i] * ptTmp1;
+		v = u + _len[i];
+		w = _ni[i] * ptTmp1;
+
+		W2 = w*w + z*z;
+		U = sqrt(u*u + W2);
+		V = sqrt(v*v + W2);
+		W = sqrt(W2);
+		T = U + V;
+		d = _len[i];
+		A = -atan((2 * w*d) / ((T + d)*fabs(T - d) + 2 * T*z));
+		if (sign(u) == sign(v)) {
+			L = sign(v)*log((V + fabs(v)) / (U + fabs(u)));
+		}
+		else {
+			L = log((V + fabs(v))*(U + fabs(u)) / (W*W));
+		}
+		Fi = w*L + 2 * z*A;
+		Fi2 = d / 4 * ((v + u)*(v + u) / T + T) + W*W*L / 2;
+		f += _n*(Fi*(ro_r + ronz) + ro*_ni[i] * Fi2) - ro*(Fi*Z / 2);
+	}
+	f = f*GRAVCONST;
+	v_Grv += f;
+}
 
 void Facet::Fld_G(const point& v_r, point& v_Grv)
 {
