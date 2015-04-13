@@ -87,17 +87,17 @@ void Facet::Init()
 	int i = 0;
 	for (; i < _sz - 1; ++i)
 	{
-		point::Sub(_pts[i + 1], _pts[i], _mi[i]);//_mi[i] = _pts[i + 1] - _pts[i];
+		point::Sub(_pts[i + 1], _pts[i], _mi[i]);
 		_L[i] = _mi[i];
 		_len[i] = _mi[i].Abs(); // edge length
 		_mi[i].Unit();
-		 point::Cross(_mi[i], _n, _ni[i]); // _ni[i] = _mi[i] / _n;   // edge unit vector v_ni
+		 point::Cross(_mi[i], _n, _ni[i]);
 	}
-	point::Sub(_pts[0], _pts[i], _mi[i]);// _mi[i] = _pts[0] - _pts[i];
+	point::Sub(_pts[0], _pts[i], _mi[i]);
 	_L[i] = _mi[i];
 	_len[i] = _mi[i].Abs();
 	_mi[i].Unit();
-	point::Cross(_mi[i], _n, _ni[i]);//_ni[i] = _mi[i] / _n;
+	point::Cross(_mi[i], _n, _ni[i]);
 
 	// what kind of computation?
 	_bLin = _densGrad.IsZero();
@@ -125,7 +125,7 @@ void Facet::Init(ptvec& pts, double densityCCW /*= 1000.0*/, double densityCW /*
 // v_Grv otput field 
 void Facet::FldVlado(const point& v_r, double& f)
 {
-	// second part of algorithm, computing field 
+	// second part of the algorithm, computing field 
 	double z, u, v, w, W2, W, U, V, T;
 
 	z = fabs(_n * (_pts.at(0) - v_r)) + EPS;
