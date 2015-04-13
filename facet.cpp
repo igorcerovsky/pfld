@@ -3,6 +3,8 @@
 namespace pfld {
 
 Facet::Facet() : _id(0),
+	_sz(0),
+	_initialized(false),
 	_n(0, 0, 0),
 	_density(1000),
 	_densityOpos(1000),
@@ -22,9 +24,12 @@ Facet::Facet() : _id(0),
 Facet::Facet(const ptvec& pts) : Facet()
 {
 	_pts.assign(pts.begin(), pts.end());
+	_initialized = false;
 }
 
 Facet::Facet(const Facet& fct) : _id(fct._id),
+	_sz(fct._sz),
+	_initialized(fct._initialized),
 	_n(fct._n),
 	_density(fct._density),
 	_densityOpos(fct._densityOpos),
@@ -44,6 +49,8 @@ Facet::Facet(const Facet& fct) : _id(fct._id),
 Facet& Facet::operator=(const Facet& fct)
 {
 	_id = fct._id;
+	_initialized = fct._initialized;
+	_sz = fct._sz;
 	_n = fct._n;
 	_density = fct._density;
 	_densityOpos = fct._densityOpos;
@@ -52,9 +59,8 @@ Facet& Facet::operator=(const Facet& fct)
 	_sign = fct._sign;
 	_pts.assign(fct._pts.begin(), fct._pts.end());
 	_L.assign(fct._L.begin(), fct._L.end());
-	_mi = fct._mi;
-	_ni = fct._ni;
-	_n = fct._n;
+	_mi.assign(fct._mi.begin(), fct._mi.end());
+	_ni.assign(fct._ni.begin(), fct._ni.end());
 	_len.assign(fct._len.begin(), fct._len.end());
 	_bLin = fct._bLin;
 	_bLinOpos = fct._bLinOpos;
@@ -69,30 +75,29 @@ bool Facet::operator==(const Facet& fct) const
 void Facet::Init()
 {
 	// side normal vector n; only if the angle between l_th and (l-1)th edge is smaller then PI (180 deg), what is true for triangle 
-	//v_n = ( pts[2] - pts[1] ) / ( pts[1] - pts[0] );	// side normal vector (operator /  is vector multiplication see class CPoint 3D)
-	_n = (_pts[0] - _pts[1]) / (_pts[1] - _pts[2]);
+	point::Cross(_pts[0] - _pts[1], _pts[1] - _pts[2], _n);
 	_n.Unit();
 
 	// for each edge
-	const int n(_pts.size());
-	_mi.resize(n);
-	_ni.resize(n);
-	_L.resize(n);
-	_len.resize(n);
+	_sz = _pts.size();
+	_mi.resize(_sz);
+	_ni.resize(_sz);
+	_L.resize(_sz);
+	_len.resize(_sz);
 	int i = 0;
-	for (; i < n - 1; ++i)
+	for (; i < _sz - 1; ++i)
 	{
-		_mi[i] = _pts[i + 1] - _pts[i];
+		point::Sub(_pts[i + 1], _pts[i], _mi[i]);//_mi[i] = _pts[i + 1] - _pts[i];
 		_L[i] = _mi[i];
 		_len[i] = _mi[i].Abs(); // edge length
 		_mi[i].Unit();
-		_ni[i] = _mi[i] / _n;   // edge unit vector v_ni
+		 point::Cross(_mi[i], _n, _ni[i]); // _ni[i] = _mi[i] / _n;   // edge unit vector v_ni
 	}
-	_mi[i] = _pts[0] - _pts[i];
+	point::Sub(_pts[0], _pts[i], _mi[i]);// _mi[i] = _pts[0] - _pts[i];
 	_L[i] = _mi[i];
 	_len[i] = _mi[i].Abs();
 	_mi[i].Unit();
-	_ni[i] = _mi[i] / _n;
+	point::Cross(_mi[i], _n, _ni[i]);//_ni[i] = _mi[i] / _n;
 
 	// what kind of computation?
 	_bLin = _densGrad.IsZero();
@@ -121,14 +126,15 @@ void Facet::Init(ptvec& pts, double densityCCW /*= 1000.0*/, double densityCW /*
 void Facet::FldVlado(const point& v_r, double& f)
 {
 	// second part of algorithm, computing field 
-	const auto n(_pts.size());
 	double z, u, v, w, W2, W, U, V, T;
 
 	z = fabs(_n * (_pts.at(0) - v_r)) + EPS;
 
-	for (unsigned i = 0; i < n; i++)
+	for (unsigned i = 0; i < _sz; i++)
 	{
-		auto tmp = _pts[i] - v_r;
+		//auto tmp = _pts[i] - v_r;
+		point tmp;
+		point::Sub(_pts[i], v_r, tmp);
 		u = _mi[i] * tmp;
 		w = _ni[i] * tmp;
 		v = u + _len[i];

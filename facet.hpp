@@ -38,7 +38,15 @@ public:
 	bool operator!=(const Point3D& pt) const { return!( *this==pt); }
 
 	Point3D operator-(const Point3D& pt) const { return Point3D(x - pt.x, y - pt.y, z - pt.z); }
+	static void Sub(const Point3D& pt1, const Point3D pt2, Point3D& res) 
+	{
+		res.x = pt1.x - pt2.x; res.y = pt1.y - pt2.y; res.z = pt1.z - pt2.z;
+	}
 	Point3D operator+(const Point3D& pt) const { return Point3D(x + pt.x, y + pt.y, z + pt.z); }
+	static void Add(const Point3D& pt1, const Point3D pt2, Point3D& res)
+	{
+		res.x = pt1.x + pt2.x; res.y = pt1.y + pt2.y; res.z = pt1.z + pt2.z;
+	}
 
 	Point3D operator-=(const Point3D& pt) { x -= pt.x; y -= pt.y; z -= pt.z; }
 	void operator+=(const Point3D& pt)    { x += pt.x; y += pt.y; z += pt.z; }
@@ -50,11 +58,17 @@ public:
 	Point3D operator *(T a) const { return Point3D(a*x,a*y,a*z); };
 
 	// vector multiplication of two vectors in 3D
-	Point3D operator /(const Point3D& pt) const 
+	//Point3D operator /(const Point3D& pt) const
+	//{
+	//	return Point3D(y*pt.z - z*pt.y,
+	//		z*pt.x - x*pt.z,
+	//		x*pt.y - y*pt.x);
+	//}
+	static void Cross(const Point3D& pt1, const Point3D& pt2, Point3D& res)
 	{
-		return Point3D(y*pt.z - z*pt.y,
-			z*pt.x - x*pt.z,
-			x*pt.y - y*pt.x);
+		res.x = pt1.y*pt2.z - pt1.z*pt2.y;
+		res.y = pt1.z*pt2.x - pt1.x*pt2.z;
+		res.z = pt1.x*pt2.y - pt1.y*pt2.x;
 	}
 	// vector / number
 	Point3D operator /(const T a) { return CPoint3D(x / a, y / a, z / a); }
@@ -118,6 +132,7 @@ public:
 
 protected:
 	bool   _initialized; // is initialized?
+	size_t _sz;
 	int    _id;    // facet ID
 	ptvec  _pts;   // points
 	ptvec  _L;     // array of vector l vectors; l = pts[i+1] - pts[i]	
