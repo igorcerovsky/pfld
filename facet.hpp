@@ -23,14 +23,13 @@ template <typename T> T sign(T val) {	return (T(0) < val) - (val < T(0));}
 template <typename T>
 class Point3D
 {
-
 public:
 	virtual ~Point3D() {};
 	Point3D() : x(0), y(0), z(0) { };
 	Point3D(T x_, T y_, T z_) : x(x_), y(y_), z(z_) { };
 	Point3D(const Point3D& pt) : x(pt.x), y(pt.y), z(pt.z) {}
 	const Point3D& operator = (const Point3D& pt)  { x = pt.x; y = pt.y; z = pt.z; return *this; }
-	Point3D(const Point3D&& pt) 
+	Point3D(const Point3D&& pt)
 	{ x = std::move(pt.x); y = std::move(pt.y); z = std::move(pt.z); }
 	const Point3D& operator = (const Point3D&& pt) 
 	{ x = std::move(pt.x); y = std::move(pt.y); z = std::move(pt.z); return *this; }
