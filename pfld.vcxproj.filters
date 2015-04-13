@@ -50,5 +50,8 @@
     <ClCompile Include="pfld_compute.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="pfld_compute_fct.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

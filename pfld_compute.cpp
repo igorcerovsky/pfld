@@ -74,7 +74,7 @@ struct compute_block
 		for (auto it = first; it != last; ++it, ++itFld)
 		{
 			point& pt = *it;
-			atmic_double f(0.0);
+			double_pfld f(0.0);
 			for (auto itFcs = facets.begin(); itFcs != facets.end(); ++itFcs ) {
 				itFcs->Fld_Gz(pt, f);
 			}
@@ -139,7 +139,7 @@ void Field_Gz__(pfld::facet_vec& facets, pfld::ptvec& fldPoints, pfld::valvec& o
 	for (auto it = fldPoints.begin(); it != fldPoints.end(); ++it, ++itFld)
 	{
 		point& pt = *it;
-		atmic_double f(0.0);
+		double_pfld f(0.0);
 		for (auto itFcs = facets.begin(); itFcs != facets.end(); ++itFcs)
 		{
 			itFcs->Fld_Gz(pt, f);

@@ -15,10 +15,9 @@ namespace pfld {
 #define GRAVCONST 6.6738480e-11
 
 
-//template<typename T> T sign(T d) { return ((d == 0) ? 0.0 : ((d<0) ? -1 : 1)); }
+//template <typename T> T sign(T val) {	return (T(0) < val) - (val < T(0));}
+template <typename T> T sign(T val) { return copysign(1.0, val); }
 
-
-template <typename T> T sign(T val) {	return (T(0) < val) - (val < T(0));}
 
 template <typename T>
 class Point3D
@@ -38,18 +37,18 @@ public:
 	bool operator!=(const Point3D& pt) const { return!( *this==pt); }
 
 	Point3D operator-(const Point3D& pt) const { return Point3D(x - pt.x, y - pt.y, z - pt.z); }
-	static void Sub(const Point3D& pt1, const Point3D pt2, Point3D& res) 
+	static void Sub(const Point3D& pt1, const Point3D& pt2, Point3D& res) 
 	{
 		res.x = pt1.x - pt2.x; res.y = pt1.y - pt2.y; res.z = pt1.z - pt2.z;
 	}
 	Point3D operator+(const Point3D& pt) const { return Point3D(x + pt.x, y + pt.y, z + pt.z); }
-	static void Add(const Point3D& pt1, const Point3D pt2, Point3D& res)
+	static void Add(const Point3D& pt1, const Point3D& pt2, Point3D& res)
 	{
 		res.x = pt1.x + pt2.x; res.y = pt1.y + pt2.y; res.z = pt1.z + pt2.z;
 	}
 
-	Point3D operator-=(const Point3D& pt) { x -= pt.x; y -= pt.y; z -= pt.z; }
-	void operator+=(const Point3D& pt)    { x += pt.x; y += pt.y; z += pt.z; }
+	void operator-=(const Point3D& pt) { x -= pt.x; y -= pt.y; z -= pt.z; }
+	void operator+=(const Point3D& pt) { x += pt.x; y += pt.y; z += pt.z; }
 
 	// vector arithmetics
 	// scalar multiplication of two vectors in 3D
@@ -57,13 +56,13 @@ public:
 	// vector * number
 	Point3D operator *(T a) const { return Point3D(a*x,a*y,a*z); };
 
-	// vector multiplication of two vectors in 3D
-	//Point3D operator /(const Point3D& pt) const
-	//{
-	//	return Point3D(y*pt.z - z*pt.y,
-	//		z*pt.x - x*pt.z,
-	//		x*pt.y - y*pt.x);
-	//}
+	// vector cross product
+	Point3D operator /(const Point3D& pt) const
+	{
+		return Point3D(y*pt.z - z*pt.y,
+			z*pt.x - x*pt.z,
+			x*pt.y - y*pt.x);
+	}
 	static void Cross(const Point3D& pt1, const Point3D& pt2, Point3D& res)
 	{
 		res.x = pt1.y*pt2.z - pt1.z*pt2.y;
@@ -73,16 +72,12 @@ public:
 	// vector / number
 	Point3D operator /(const T a) { return CPoint3D(x / a, y / a, z / a); }
 
-	// another operator maybe useful sometimes
-	Point3D operator+(const T a) const { return CPoint3D(x + a, y + a, z + a); }
-
 	// vector length
 	double Abs() const { return sqrt(x*x + y*y + z*z); };
 	// unit vector
 	void Unit() {
-		auto eps = std::numeric_limits<T>::epsilon();
 		double l = Abs();
-		if (l > eps ) { x /= l; y /= l; z /= l; }
+		if (l > DBL_EPSILON) { x /= l; y /= l; z /= l; }
 		else { x = 0; y = 0; z = 0; }
 	}
 
@@ -110,7 +105,7 @@ enum class FacetType { normal, oposite };
 using valvec = std::vector < double >;
 using point = Point3D < double >;
 using ptvec = std::vector < Point3D<double> > ;
-using atmic_double = std::atomic < double > ;
+using double_pfld = std::atomic < double > ;
 
 class Facet
 {
@@ -128,7 +123,7 @@ public:
 	//Facet& operator=(const Facet&& fct) = delete;
 
 	void operator()(const point& v_r, point& v_Grv);
-	void operator()(const point& v_r, atmic_double& g);
+	void operator()(const point& v_r, double_pfld& g);
 
 protected:
 	bool   _initialized; // is initialized?
@@ -171,7 +166,7 @@ public:
 	//void SetSign(double sign) { _sign = sign; }
 
 	void Fld_G(const point &v_r, point& v_Grv);
-	void Fld_Gz(const point &v_r, atmic_double& g);
+	void Fld_Gz(const point &v_r, double_pfld& g);
 
 	ptvec& Data() { return _pts;}
 

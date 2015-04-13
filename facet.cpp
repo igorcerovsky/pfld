@@ -159,7 +159,7 @@ void Facet::Fld_G(const point& v_r, point& v_Grv)
 }
 
 
-void Facet::Fld_Gz(const point& v_r, atmic_double& g)
+void Facet::Fld_Gz(const point& v_r, double_pfld& g)
 {
 	double f = 0.0;
 	FldVlado(v_r, f);
@@ -172,7 +172,7 @@ void Facet::operator()(const point& v_r, point& v_Grv)
 	Fld_G(v_r, v_Grv);
 }
 
-void Facet::operator()(const point& v_r, atmic_double& g)
+void Facet::operator()(const point& v_r, double_pfld& g)
 {
 	Fld_Gz(v_r, g);
 }
