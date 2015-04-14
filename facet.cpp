@@ -53,6 +53,8 @@ bool Facet::operator==(const Facet& fct) const
 
 void Facet::Init()
 {
+	if (_initialized)
+		return;
 	// side normal vector n; only if the angle between l_th and (l-1)th edge is smaller then PI (180 deg), what is true for triangle 
 	point::Cross(_pts[0] - _pts[1], _pts[1] - _pts[2], _n);
 	_n.Unit();

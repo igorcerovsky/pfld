@@ -15,8 +15,8 @@ namespace pfld {
 #define GRAVCONST 6.6738480e-11
 
 
-//template <typename T> T sign(T val) {	return (T(0) < val) - (val < T(0));}
-template <typename T> T sign(T val) { return copysign(1.0, val); }
+template <typename T> T sign(T val) {	return (T(0) < val) - (val < T(0));}
+//template <typename T> T sign(T val) { return copysign(1.0, val); }
 
 
 template <typename T>
@@ -105,8 +105,11 @@ enum class FacetType { normal, oposite };
 using valvec = std::vector < double >;
 using point = Point3D < double >;
 using ptvec = std::vector < Point3D<double> > ;
-using double_pfld = std::atomic < double > ;
-
+#ifdef FIELD_ATOMIC_DOUBLE
+	using double_pfld = std::atomic < double > ;
+#else
+	using double_pfld = double;
+#endif
 
 class Facet
 {
