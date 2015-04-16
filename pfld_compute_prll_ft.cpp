@@ -24,7 +24,7 @@ public:
 };
 
 template<typename Iter>
-struct init_block
+struct init_block_ft
 {
 	int operator()(Iter first, Iter last)
 	{
@@ -37,7 +37,7 @@ struct init_block
 };
 
 template<typename Iter>
-void parallel_init(Iter first, Iter last)
+void parallel_init_ft(Iter first, Iter last)
 {
 	unsigned long const length = (unsigned long const)std::distance(first, last);
 
@@ -71,7 +71,7 @@ void parallel_init(Iter first, Iter last)
 		else
 			std::advance(block_end, block_size);
 
-		std::packaged_task<int(Iter, Iter)> task((init_block<Iter>()));
+		std::packaged_task<int(Iter, Iter)> task((init_block_ft<Iter>()));
 		futures[i] = task.get_future();
 		threads[i] = std::thread(std::move(task), block_start, block_end);
 		block_start = block_end;
@@ -80,7 +80,7 @@ void parallel_init(Iter first, Iter last)
 
 
 template<typename ItPts, typename Facets, typename FldType>
-struct cmp_block
+struct cmp_block_ft
 {
 	FldType operator()(ItPts first, ItPts last, Facets& facets)
 	{
@@ -99,7 +99,7 @@ struct cmp_block
 };
 
 template<typename ItPts, typename Facets, typename OutField>
-void parallel_cmp(ItPts first, ItPts last, Facets& facets, OutField& field)
+void parallel_cmp_ft(ItPts first, ItPts last, Facets& facets, OutField& field)
 {
 	unsigned long const length = (unsigned long const)std::distance(first, last);
 
@@ -134,15 +134,15 @@ void parallel_cmp(ItPts first, ItPts last, Facets& facets, OutField& field)
 			std::advance(block_end, block_size);
 
 		std::packaged_task<valvec(ItPts, ItPts, Facets&)>
-			task((cmp_block<ItPts, Facets, valvec>()));
+			task((cmp_block_ft<ItPts, Facets, valvec>()));
 		futures[i] = task.get_future();
 		threads[i] = std::thread(std::move(task), block_start, block_end, facets);
 		block_start = block_end;
 	}
-	for (unsigned long i = 0; i < (actual_threads); ++i)
+	for (unsigned long i = 0; i < actual_threads; ++i)
 	{
 		valvec thread_result = std::move(futures[i].get());
-		field.insert(field.begin(), thread_result.begin(), thread_result.end());
+		field.insert(field.end(), thread_result.begin(), thread_result.end());
 	}
 }
 
@@ -150,9 +150,9 @@ void parallel_cmp(ItPts first, ItPts last, Facets& facets, OutField& field)
 // output field is added to the outFld vector in order of fldPoints
 void Field_Gz_(pfld::facet_vec& facets, pfld::ptvec& fldPoints, pfld::valvec& outFld)
 {
-	parallel_init(facets.begin(), facets.end());
+	parallel_init_ft(facets.begin(), facets.end());
 
-	parallel_cmp(fldPoints.begin(), fldPoints.end(), facets, outFld);
+	parallel_cmp_ft(fldPoints.begin(), fldPoints.end(), facets, outFld);
 }
 
 
