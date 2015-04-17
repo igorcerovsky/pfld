@@ -119,29 +119,71 @@ void Facet::FldVlado(const point& v_r, double& f)
 		W = sqrt(W2);
 		T = U + V;
 		f += w * (sign(v)*log((V + fabs(v)) / W) - sign(u)*log((U + fabs(u)) / W)) -
-			2 * z*atan((2 * w*_len[i]) / ((T + _len[i])*fabs(T - _len[i]) + 2 * T*z));
+			2.0 * z*atan((2.0 * w *_len[i]) / ((T + _len[i])*fabs(T - _len[i]) + 2.0 * T*z));
 	}
 	f *= GRAVCONST;
 }
 
 
-// gravity field for variable density
+// gravity field for linearly variable density
+// ro density gradient vector
+// ro0 density in origin of coordinate system
+void Facet::Fld_Gz(const point& v_r, const point& ro, const double& ro0, double& gz)
+{
+	// second part of algorithm, computing field 
+	double f{ 0.0 };
+	const double ro_r{ ro0 + ro*v_r };
+
+	double Z{ _n * (_pts[0] - v_r) };
+	double z{ fabs(Z) + EPS };
+
+	const double ronz{ ro*_n*Z };
+	for (int i = 0; i < _sz; ++i)
+	{
+		double u, v, w, W2, U, V, T, L, A, Fi, Fi2;
+		point ptTmp1;
+		point::Sub(_pts[i], v_r, ptTmp1);
+		u = _mi[i] * ptTmp1;
+		v = u + _len[i];
+		w = _ni[i] * ptTmp1;
+
+		W2 = w*w + z*z;
+		U = sqrt(u*u + W2);
+		V = sqrt(v*v + W2);
+		T = U + V;
+		double& d = _len[i];
+		A = -atan((2.0 * w*d) / ((T + d)*fabs(T - d) + 2.0 * T*z));
+		if (sign(u) == sign(v)) {
+			L = sign(v)*log((V + fabs(v)) / (U + fabs(u)));
+		}
+		else {
+			L = log((V + fabs(v))*(U + fabs(u)) / W2);
+		}
+		Fi = w*L + 2.0 * z*A;
+		Fi2 = d * 0.25 * ((v + u)*(v + u) / T + T) + W2*L * 0.5;
+		f += _n.z*(Fi*(ro_r + ronz) + ro*_ni[i] * Fi2) - ro.z*(Fi*Z * 0.5);
+	}
+	f = f*GRAVCONST;
+	gz += f;
+}
+
+
+// gravity field for linearly variable density
 // ro density gradient vector
 // ro0 density in origin of coordinate system
 void Facet::Fld_G(const point& v_r, point& v_Grv, const point& ro, const double& ro0)
 {
-	int n = 3;
 	// second part of algorithm, computing field 
-	double z, u, v, w, W2, W, U, V, T, L, A, Fi, Fi2, d, Z;
 	point f;
 	const double ro_r{ ro0 + ro*v_r };
 
-	Z = _n * (_pts[0] - v_r);
-	z = fabs(Z) + EPS;
+	double Z{ _n * (_pts[0] - v_r) };
+	double z{ fabs(Z) + EPS };
 
 	const double ronz = ro*_n*Z;
-	for (int i = 0; i < n; i++) 
+	for (int i = 0; i < _sz; ++i) 
 	{
+		double u, v, w, W2, U, V, T, L, A, Fi, Fi2;
 		point ptTmp1;
 		point::Sub(_pts[i],v_r, ptTmp1);
 		u = _mi[i] * ptTmp1;
@@ -151,19 +193,18 @@ void Facet::Fld_G(const point& v_r, point& v_Grv, const point& ro, const double&
 		W2 = w*w + z*z;
 		U = sqrt(u*u + W2);
 		V = sqrt(v*v + W2);
-		W = sqrt(W2);
 		T = U + V;
-		d = _len[i];
-		A = -atan((2 * w*d) / ((T + d)*fabs(T - d) + 2 * T*z));
+		double& d = _len[i];
+		A = -atan((2.0 * w*d) / ((T + d)*fabs(T - d) + 2.0 * T*z));
 		if (sign(u) == sign(v)) {
 			L = sign(v)*log((V + fabs(v)) / (U + fabs(u)));
 		}
 		else {
-			L = log((V + fabs(v))*(U + fabs(u)) / (W*W));
+			L = log((V + fabs(v))*(U + fabs(u)) / W2);
 		}
-		Fi = w*L + 2 * z*A;
-		Fi2 = d / 4 * ((v + u)*(v + u) / T + T) + W*W*L / 2;
-		f += _n*(Fi*(ro_r + ronz) + ro*_ni[i] * Fi2) - ro*(Fi*Z / 2);
+		Fi = w*L + 2.0 * z*A;
+		Fi2 = d * 0.25 * ((v + u)*(v + u) / T + T) + W2*L * 0.5;
+		f += _n*(Fi*(ro_r + ronz) + ro*_ni[i] * Fi2) - ro*(Fi*Z *0.5);
 	}
 	f = f*GRAVCONST;
 	v_Grv += f;

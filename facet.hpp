@@ -146,6 +146,7 @@ public:
 	void Fld_G(const point &v_r, point& v_Grv);
 	void Fld_Gz(const point &v_r, double_pfld& g);
 	void Fld_G(const point& v_r, point& v_Grv, const point& ro, const double& ro0);
+	void Fld_Gz(const point& v_r, const point& ro, const double& ro0, double& gz);
 
 	ptvec& Data() { return _pts;}
 
