@@ -12,6 +12,7 @@ namespace pfld {
 
 #define EPS	1.0e-12
 #define PI 3.1415926535897932384626433832795
+#define PI2 6.283185307179586476925286766559
 #define GRAVCONST 6.6738480e-11
 
 
@@ -100,7 +101,6 @@ public:
 };
 
 
-enum class FacetType { normal, oposite };
 
 using valvec = std::vector < double >;
 using point = Point3D < double >;
@@ -113,6 +113,8 @@ using ptvec = std::vector < Point3D<double> > ;
 
 class Facet
 {
+	enum class FacetType { normal, oposite };
+
 public:
 	virtual ~Facet() {};
 	Facet();
@@ -135,7 +137,6 @@ protected:
 	ptvec  _ni;    // arrys of unit ni vectors; ni = _mi[i] / _n;
 	point  _n;     // facet unit normal vector
 	valvec _len;   // arry of side lengths
-	//valvec _g;     // results gx, gy, gz, gxx, gyy, gzz, gxy, gxz, gyz
 
 
 public:
@@ -145,11 +146,10 @@ public:
 
 	void Fld_G(const point &v_r, point& v_Grv);
 	void Fld_Gz(const point &v_r, double_pfld& g);
-	void Fld_G(const point& v_r, point& v_Grv, const point& ro, const double& ro0);
+	void Fld_G(const point& v_r, const point& ro, const double& ro0, point& v_Grv);
 	void Fld_Gz(const point& v_r, const point& ro, const double& ro0, double& gz);
 
 	ptvec& Data() { return _pts;}
-
 
 protected:
 	void FldVlado(const point &v_r, double& f);

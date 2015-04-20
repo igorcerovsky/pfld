@@ -65,7 +65,7 @@ void Facet::Init()
 	_ni.resize(_sz);
 	_L.resize(_sz);
 	_len.resize(_sz);
-	int i = 0;
+	size_t i = 0;
 	for (; i < _sz - 1; ++i)
 	{
 		point::Sub(_pts[i + 1], _pts[i], _mi[i]);
@@ -94,6 +94,9 @@ void Facet::Init(ptvec& pts, double densityCCW /*= 1000.0*/, double densityCW /*
 	_pts.assign(pts.begin(), pts.end());
 	Init();
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//********** field Vlado Pohanka **********************************************
 
 // !!! Init MUST be called first
 // v_r point distance vector
@@ -138,7 +141,7 @@ void Facet::Fld_Gz(const point& v_r, const point& ro, const double& ro0, double&
 	double z{ fabs(Z) + EPS };
 
 	const double ronz{ ro*_n*Z };
-	for (int i = 0; i < _sz; ++i)
+	for (size_t i = 0; i < _sz; ++i)
 	{
 		double u, v, w, W2, U, V, T, L, A, Fi, Fi2;
 		point ptTmp1;
@@ -171,7 +174,7 @@ void Facet::Fld_Gz(const point& v_r, const point& ro, const double& ro0, double&
 // gravity field for linearly variable density
 // ro density gradient vector
 // ro0 density in origin of coordinate system
-void Facet::Fld_G(const point& v_r, point& v_Grv, const point& ro, const double& ro0)
+void Facet::Fld_G(const point& v_r, const point& ro, const double& ro0, point& v_Grv)
 {
 	// second part of algorithm, computing field 
 	point f;
@@ -181,7 +184,7 @@ void Facet::Fld_G(const point& v_r, point& v_Grv, const point& ro, const double&
 	double z{ fabs(Z) + EPS };
 
 	const double ronz = ro*_n*Z;
-	for (int i = 0; i < _sz; ++i) 
+	for (size_t i = 0; i < _sz; ++i) 
 	{
 		double u, v, w, W2, U, V, T, L, A, Fi, Fi2;
 		point ptTmp1;
@@ -235,6 +238,9 @@ void Facet::operator()(const point& v_r, double_pfld& g)
 {
 	Fld_Gz(v_r, g);
 }
+
+//********** end field Vlado Pohanka ******************************************
+///////////////////////////////////////////////////////////////////////////////
 
 
 }; // namespace pfld
