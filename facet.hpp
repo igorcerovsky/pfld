@@ -20,6 +20,8 @@ template <typename T> T sign(T val) {	return (T(0) < val) - (val < T(0));}
 //template <typename T> T sign(T val) { return copysign(1.0, val); }
 
 
+
+
 template <typename T>
 class Point3D
 {
@@ -94,6 +96,13 @@ public:
 			&& fabs(z - pt.z) < eps);
 	}
 
+	static bool AlmostEqual(const Point3D& pt1, const Point3D& pt2, const int digits=4)
+	{
+		return almost_equal(pt1.y, pt2.y, digits);
+			//&& almost_equal(pt1.y, pt2.y, digits) 
+			//&& almost_equal(pt1.z, pt2.z, digits);
+	}
+
 public:
 	T x;
 	T y;
@@ -151,6 +160,12 @@ public:
 
 	ptvec& Data() { return _pts;}
 
+	void FldGS(const point& v_r, const point v_M, point& mag, point& grv);
+	double SolidAngle(ptvec& spts);
+
+
+	double Facet::SolidAngle_(point* spts);
+	void Facet::FldGS_(const point& v_r, const point& v_M, point& v_Mag, point& v_Grv);
 protected:
 	void FldVlado(const point &v_r, double& f);
 
