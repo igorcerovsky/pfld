@@ -133,8 +133,8 @@ public:
 	Facet& operator=(const Facet& fct);
 	bool operator==(const Facet& fct) const;
 
-	void operator()(const point& v_r, point& v_Grv);
-	void operator()(const point& v_r, double_pfld& g);
+	void operator()(const point& r, point& grv);
+	void operator()(const point& r, double_pfld& g);
 
 protected:
 	bool   _initialized; // is initialized?
@@ -153,21 +153,20 @@ public:
 	void Init(ptvec& pts);
 	void Init(ptvec& pts, double densityCCW, double densityCW = 0.0);
 
-	void Fld_G(const point &v_r, point& v_Grv);
-	void Fld_Gz(const point &v_r, double_pfld& g);
-	void Fld_G(const point& v_r, const point& ro, const double& ro0, point& v_Grv);
-	void Fld_Gz(const point& v_r, const point& ro, const double& ro0, double& gz);
+	void Fld_G(const point &r, point& grv);
+	void Fld_Gz(const point &r, double_pfld& g);
+	void Fld_G(const point& r, const point& ro, const double& ro0, point& grv);
+	void Fld_Gz(const point& r, const point& ro, const double& ro0, double& gz);
 
 	ptvec& Data() { return _pts;}
 
-	void FldGS(const point& v_r, const point v_M, point& mag, point& grv);
+	void FldGS(const point& r, const point v_M, point& mag, point& grv);
 	double SolidAngle(ptvec& spts);
 
 
 	double Facet::SolidAngle_(point* spts);
-	void Facet::FldGS_(const point& v_r, const point& v_M, point& v_Mag, point& v_Grv);
 protected:
-	void FldVlado(const point &v_r, double& f);
+	void FldVlado(const point &r, double& f);
 
 };
 
