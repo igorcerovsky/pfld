@@ -160,13 +160,15 @@ public:
 
 	ptvec& Data() { return _pts;}
 
-	void FldGS(const point& r, const point v_M, point& mag, point& grv);
+	void FldGS(const point& r, const point M, point& mag, point& grv);
+	void FldGS_M(const point& r, const point M, point& mag);
+	void FldGS_G(const point& r, point& grv);
+	void FldGS_Gz(const point& r, double& gz);
 	double SolidAngle(ptvec& spts);
 
-
-	double Facet::SolidAngle_(point* spts);
 protected:
 	void FldVlado(const point &r, double& f);
+	void FldGS(const point& r, point& f);
 
 };
 

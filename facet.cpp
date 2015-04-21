@@ -2,10 +2,10 @@
 
 namespace pfld {
 
-Facet::Facet() : _id(0),
+Facet::Facet() : _id(-1),
 	_sz(0),
 	_initialized(false),
-	_n(0, 0, 0),
+	_n(),
 	_mi(),
 	_ni(),
 	_pts(),
@@ -95,8 +95,7 @@ void Facet::Init(ptvec& pts, double densityCCW /*= 1000.0*/, double densityCW /*
 	Init();
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//********** field Vlado Pohanka **********************************************
+
 
 // !!! Init MUST be called first
 // r point distance vector
@@ -220,7 +219,6 @@ void Facet::Fld_G(const point& r, point& grv)
 	grv += _n*f;
 }
 
-
 void Facet::Fld_Gz(const point& r, double_pfld& g)
 {
 	double f = 0.0;
@@ -239,20 +237,53 @@ void Facet::operator()(const point& r, double_pfld& g)
 	Fld_Gz(r, g);
 }
 
-//********** end field Vlado Pohanka ******************************************
-///////////////////////////////////////////////////////////////////////////////
 
+// M			magnetization vector
+// Mag		output magnetic field
+// r			measuring point - oposit direction 
+// mag			computed magnetic field
+// grv			computed gravity field
+void Facet::FldGS(const point& r, const point M, point& mag, point& grv)
+{
+	point f;
+	FldGS(r, f);
 
-///////////////////////////////////////////////////////////////////////////////
-//********** field Singh && Guptasarma ****************************************
-// measuring point MUST be coordinate system origin => first transform points
-// v_M			magnetization vector
-// v_Mag		output magnetic field
-// r			measuring point
-void Facet::FldGS(const point& r, const point v_M, point& mag, point& grv)
+	// magnetic field
+	double s = M * _n; // surface pole density
+	mag += f * s;
+
+	// gravity field
+	double d = (_pts[0] + (r*-1.)) * _n;
+	grv += f * d * GRAVCONST;	// kappa
+}
+
+void Facet::FldGS_M(const point& r, const point M, point& mag)
+{
+	point f;
+	FldGS(r, f);
+	mag += f * (M * _n);
+}
+
+void Facet::FldGS_G(const point& r, point& grv)
+{
+	point f;
+	FldGS(r, f);
+	grv += f * ((_pts[0] + (r*-1.)) * _n) * GRAVCONST;	// kappa
+}
+
+void Facet::FldGS_Gz(const point& r, double& gz)
+{
+	point f;
+	FldGS(r, f);
+	gz += f.z * ((_pts[0] + (r*-1.)) * _n) * GRAVCONST;	// kappa
+}
+
+// r  measuring point
+// f  output fielkd
+void Facet::FldGS(const point& r, point& f)
 {
 	// shifted points, make local copy of shifted points, do not change origanal points
-	ptvec	spts(_sz);	
+	ptvec	spts(_sz);
 	point	shf{ r * (-1) };
 	for (size_t i = 0; i<_sz; i++) {
 		point::Add(_pts[i], shf, spts[i]);
@@ -268,7 +299,7 @@ void Facet::FldGS(const point& r, const point v_M, point& mag, point& grv)
 		double h = r + b / (2 * _len[i]);
 		double I;
 		if (h > EPS)
-			I = (1.0 / _len[i])*log((sqrt(_len[i]*_len[i] + b + r*r) + _len[i] + b / (2.0 * _len[i])) / h);
+			I = (1.0 / _len[i])*log((sqrt(_len[i] * _len[i] + b + r*r) + _len[i] + b / (2.0 * _len[i])) / h);
 		else
 			I = (1.0 / _len[i]) * log(fabs(_len[i] - r) / r);
 
@@ -277,19 +308,10 @@ void Facet::FldGS(const point& r, const point v_M, point& mag, point& grv)
 		R += I*_L[i].z;
 	}
 
-	point f{ dOmega*_n.x + Q*_n.z - R*_n.y,
+	f = point{ dOmega*_n.x + Q*_n.z - R*_n.y,
 		dOmega*_n.y + R*_n.x - P*_n.z,
 		dOmega*_n.z + P*_n.y - Q*_n.x };
-
-	// magnetic field
-	double s = v_M * _n; // surface pole density
-	mag += f * s;
-
-	// gravity field
-	double d = spts[0] * _n;
-	grv += f * d * GRAVCONST;	// kappa
 }
-
 
 // computes solid angle as seen from the ORIGIN of coordinate system
 // pts   array  of pointers to polygon points
@@ -319,7 +341,7 @@ double Facet::SolidAngle(ptvec& pts)
 		n1.Unit();
 		point::Cross(*pp[i + 2], *pp[i + 1], n2);
 		n2.Unit();
-		double dPerp = *pp[i+2] * n1;
+		double dPerp = *pp[i + 2] * n1;
 		double b = n1 * n2;
 		if (b<-1.0) { b = -1.0; }
 		if (b>1.0)  { b = 1.0; }
@@ -335,9 +357,6 @@ double Facet::SolidAngle(ptvec& pts)
 
 	return Omega;
 }
-//********** end field Singh && Guptasarma ************************************
-///////////////////////////////////////////////////////////////////////////////
-
 
 
 
