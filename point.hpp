@@ -77,24 +77,6 @@ public:
 		else { x = 0; y = 0; z = 0; }
 	}
 
-	bool IsZero()
-	{
-		return (x < eps && y < eps && z < eps);
-	}
-
-	bool IsEqualEps(const Point3D& pt, const T eps)
-	{
-		return (fabs(x - pt.x) < eps
-			&& fabs(y - pt.y) < eps
-			&& fabs(z - pt.z) < eps);
-	}
-
-	static bool AlmostEqual(const Point3D& pt1, const Point3D& pt2, const int digits = 4)
-	{
-		return almost_equal(pt1.y, pt2.y, digits);
-		//&& almost_equal(pt1.y, pt2.y, digits) 
-		//&& almost_equal(pt1.z, pt2.z, digits);
-	}
 
 public:
 	T x;
