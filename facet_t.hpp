@@ -37,7 +37,6 @@ public:
 #else
 	using double_pfld = T;
 #endif
-	enum class FacetType { normal, oposite };
 
 public:
 	virtual ~Facet() {};
@@ -66,20 +65,18 @@ protected:
 public:
 	void Init();
 	void Init(ptvec& pts);
-	void Init(ptvec& pts, T densityCCW, T densityCW = 0.0);
 
 	void Fld_G(const point &r, point& grv);
 	void Fld_Gz(const point &r, double_pfld& g);
 	void Fld_G(const point& r, const point& ro, const T& ro0, point& grv);
 	void Fld_Gz(const point& r, const point& ro, const T& ro0, T& gz);
 
-	ptvec& Data() { return _pts;}
-
 	void FldGS(const point& r, const point M, point& mag, point& grv);
 	void FldGS_M(const point& r, const point M, point& mag);
 	void FldGS_G(const point& r, point& grv);
 	void FldGS_Gz(const point& r, T& gz);
-	T SolidAngle(ptvec& spts);
+
+	static T SolidAngle(ptvec& pts, const T inOut, const size_t sz);
 
 protected:
 	void FldVlado(const point &r, T& f);

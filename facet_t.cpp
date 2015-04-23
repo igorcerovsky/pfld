@@ -96,14 +96,6 @@ void Facet<T>::Init(ptvec& pts)
 	Init();
 }
 
-template<typename T>
-void Facet<T>::Init(ptvec& pts, T densityCCW /*= 1000.0*/, T densityCW /*= 0.0*/)
-{
-	_pts.assign(pts.begin(), pts.end());
-	Init();
-}
-
-
 
 // !!! Init MUST be called first
 // r point distance vector
@@ -310,7 +302,7 @@ void Facet<T>::FldGS(const point& r, point& f)
 	}
 
 	T P{ 0. }, Q{ 0. }, R{ 0. };
-	T dOmega = SolidAngle(spts);
+	T dOmega = SolidAngle(spts, _n * spts[1], _sz);
 
 	// for all edges compute length, P, Q, R
 	for (size_t i = 0; i<_sz; i++) {
@@ -336,27 +328,26 @@ void Facet<T>::FldGS(const point& r, point& f)
 // computes solid angle as seen from the ORIGIN of coordinate system
 // pts   array  of pointers to polygon points
 template<typename T>
-T Facet<T>::SolidAngle(ptvec& pts)
+T Facet<T>::SolidAngle(ptvec& pts, const T inOut, const size_t sz)
 {
 	T Omega{ 0. };	// solid angle
 	// is the polygon seen from the otside or inside?
 	T dFi = 0.;
-	T dInOut{ _n * pts[1] };
-	if (dInOut == 0.)
+	if (inOut == 0.)
 		return 0.;
 
-	std::vector<point*> pp(_sz + 2);
+	std::vector<point*> pp(sz + 2);
 	auto itPP = pp.begin();
 	*itPP = &(*(--pts.end()));
 	itPP++;
 	for (auto it = pts.begin(); it != pts.end(); ++it, ++itPP)
 		*itPP = &(*it);
 	*itPP = &(*(pts.begin()));
-	if (dInOut >  0.) {
+	if (inOut >  0.) {
 		std::reverse(pp.begin(), pp.end());
 	}
 
-	for (size_t i = 0; i<_sz; i++) {
+	for (size_t i = 0; i<sz; i++) {
 		point n1, n2;
 		point::Cross(*pp[i + 1], *pp[i], n1);
 		n1.Unit();
@@ -372,8 +363,8 @@ T Facet<T>::SolidAngle(ptvec& pts)
 		}
 		dFi += a;
 	}
-	Omega = dFi - (_sz - 2)*T(PI);
-	if (dInOut > 0)
+	Omega = dFi - (sz - 2)*T(PI);
+	if (inOut > 0)
 		Omega = -Omega;
 
 	return Omega;
