@@ -19,21 +19,24 @@ namespace pfld {
 #define GRAVCONST 6.6738480e-11
 
 
-template <typename T> T sign(T val) {	return (T(0) < val) - (val < T(0));}
+template <typename T> T sign(T val) {	return T(0. < val) - (val < 0.);}
 //template <typename T> T sign(T val) { return copysign(1.0, val); }
 
 
-using valvec = std::vector < double >;
-using point = Point3D < double >;
-using ptvec = std::vector < Point3D<double> > ;
-#ifdef FIELD_ATOMIC_DOUBLE
-	using double_pfld = std::atomic < double > ;
-#else
-	using double_pfld = double;
-#endif
 
+template<typename T>
 class Facet
 {
+public:
+	using valvec = std::vector < T >;
+	using point = Point3D < T >;
+	using ptvec = std::vector < Point3D<T> >;
+
+#ifdef FIELD_ATOMIC_DOUBLE
+	using double_pfld = std::atomic < T >;
+#else
+	using double_pfld = T;
+#endif
 	enum class FacetType { normal, oposite };
 
 public:
@@ -63,28 +66,27 @@ protected:
 public:
 	void Init();
 	void Init(ptvec& pts);
-	void Init(ptvec& pts, double densityCCW, double densityCW = 0.0);
+	void Init(ptvec& pts, T densityCCW, T densityCW = 0.0);
 
 	void Fld_G(const point &r, point& grv);
 	void Fld_Gz(const point &r, double_pfld& g);
-	void Fld_G(const point& r, const point& ro, const double& ro0, point& grv);
-	void Fld_Gz(const point& r, const point& ro, const double& ro0, double& gz);
+	void Fld_G(const point& r, const point& ro, const T& ro0, point& grv);
+	void Fld_Gz(const point& r, const point& ro, const T& ro0, T& gz);
 
 	ptvec& Data() { return _pts;}
 
 	void FldGS(const point& r, const point M, point& mag, point& grv);
 	void FldGS_M(const point& r, const point M, point& mag);
 	void FldGS_G(const point& r, point& grv);
-	void FldGS_Gz(const point& r, double& gz);
-	double SolidAngle(ptvec& spts);
+	void FldGS_Gz(const point& r, T& gz);
+	T SolidAngle(ptvec& spts);
 
 protected:
-	void FldVlado(const point &r, double& f);
+	void FldVlado(const point &r, T& f);
 	void FldGS(const point& r, point& f);
 
 };
 
-using facet_vec = std::vector < Facet >;
 
 
 }; // namespace pfld
