@@ -7,7 +7,6 @@
 
 namespace pfld {
 
-#define EPS	1.0e-12
 
 template <typename T>
 class Point3D
